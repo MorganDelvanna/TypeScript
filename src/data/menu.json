@@ -1,0 +1,98 @@
+[
+  {
+    "text": "Welcome",
+    "href": "/"
+  },
+  {
+    "text": "Range Rules",
+    "href": "/rules"
+  },
+  {
+    "text": "Club Information",
+    "children": [
+      {
+        "text": "Club history",
+        "href": "/history"
+      },
+      {
+        "text": "Location",
+        "href": "/location"
+      },
+      {
+        "text": "Schedule",
+        "href": "/schedule"
+      },
+      {
+        "text": "FAQ",
+        "href": "/faq"
+      }
+    ]
+  },
+  {
+    "text": "Membership",
+    "children": [
+      {
+        "text": "Info",
+        "href": "/membership"
+      },
+      {
+        "text": "New Members",
+        "href": "/newmember"
+      },
+      {
+        "text": "Renewals",
+        "href": "/renewal"
+      }
+    ]
+  },
+  {
+    "text": "Links",
+    "children": [
+      {
+        "text": "Shows & Auctions",
+        "href": "/shows"
+      },
+      {
+        "text": "Shooting links",
+        "href": "/links"
+      }
+    ]
+  },
+  {
+    "text": "CALENDAR",
+    "href": "/calendar"
+  },
+  {
+    "text": "News",
+    "href": "/news"
+  },
+  {
+    "text": "Facilities",
+    "children": [
+      {
+        "text": "Indoors",
+        "href": "/indoors"
+      },
+      {
+        "text": "Outdoor",
+        "href": "/outdoors"
+      },
+      {
+        "text": "Courses",
+        "href": "/courses"
+      },
+      {
+        "text": "Property map",
+        "href": "/property"
+      }
+    ]
+  },
+  {
+    "text": "Sections",
+    "href": "/sections"
+  },
+  {
+    "text": "Contact us",
+    "href": "/contact"
+  }
+]

@@ -1,0 +1,46 @@
+import { MenuItem } from "../utils/menuLoader";
+import { renderLayout } from "./layout";
+
+export interface PageProps {
+  menuMap: MenuItem[];
+  currentPath: string;
+}
+
+export const renderLocationView = (props: PageProps): string => {
+    const content = `
+      <div class="row">
+            <div class="col-12">
+                <h1> Location </h1>
+            </div>
+        </div>
+        <div class="row  align-items-center">
+            <div class="col-10">
+                <p>
+                    Peterborough Fish & Game Association <br />
+                    608 Division Road, Peterborough, Ont.
+                </p>
+                <p style="text-align:center">
+                    <a style="text-decoration:none;" href="http://maps.google.ca/maps?f=q&source=s_q&hl=en&geocode=&q=Peterborough+Fish+%26+Game+Association&sll=44.336127,-78.235263&sspn=0.00884,0.022638&g=608+Division+Rd,+Douro-Dummer,+Peterborough+County,+Ontario&ie=UTF8&hq=Fish+%26+Game+Association&hnear=Peterborough,+Peterborough+County,+Ontario&ll=44.336457,-78.235316&spn=0.004228,0.011319&z=17&iwloc=A" target="_blank">
+                        <img src="images/map-horz-lo-res.jpg" alt="Click for Google Map" border=0 width="500" height="250" /><br />
+                        <span style="font-size:x-small; vertical-align:super; ">(click for google map directions)</span>
+                    </a>
+
+                </p>
+                <p><b> Directions to the Peterborough Fish & Game Association </b></p>
+
+                <p>
+                    From Toronto: <br />
+                    401 East to 115/35 exit, north on 115 to Hwy 7 East to Ottawa   Continue east  to Providence  Line.
+                    Turn left.   At Division Rd. Turn right. 1.5 kms on the left.
+                </p>
+
+                <p>
+                    From Ottawa: <br />
+                    West along Hwy 7.   Turn right at  Hwy #134. Turn left at Division Rd.. 1 km on the right.
+                </p>
+            </div>
+        </div>
+    `;
+
+    return renderLayout({ menu: props.menuMap, currentPath: props.currentPath}, content );
+};
