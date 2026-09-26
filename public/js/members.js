@@ -40,10 +40,16 @@ function addFamilyRow() {
           </div>`;
 
     $('#familyApp').append(html);
+    $('#family').val(index+1);
+    recalc();
+    updateGrandTotal();
 }
 
 function removeFamily(index) {
     $(`.familyRow[index="${index}"]`).remove();
+    let count = $('#familyApp .familyRow').length;
+    $('#family').val(count);
+    recalc();
 }
 
 function addClubRow(){
@@ -375,32 +381,16 @@ function gatherApplicantObject() {
 }
 
 function clearForm() {
-    // reset inputs except templates
-    $('#form')[0].reset();
-    setApplicationType()
-    // reset Vue-managed family members if present
-        // clear Vue-managed data if present
-        if (window.formVm && typeof window.formVm === 'object') {
-            if (Array.isArray(window.formVm.members)) window.formVm.members = [];
-            if (Array.isArray(window.formVm.clubs)) window.formVm.clubs = [];
-            if (Array.isArray(window.formVm.courses)) window.formVm.courses = [];
-            // keep the family count in sync
-            const el = $('#family'); if (el.length) el.val(0);
-            if (typeof window.formVm.updateCount === 'function') window.formVm.updateCount();
-        } else if (window.familyVm && Array.isArray(window.familyVm.members)) {
-            window.familyVm.members = [];
-            $('#family').val(0);
-        } else {
-            // remove dynamically added family rows (legacy)
-            $('.familyRow').not(':first').remove();
-        }
-        // remove DOM-managed club/course rows and clear inputs for legacy mode
-        $('.clubRow').not(':first').remove();
-        $('.courseRow').not(':first').remove();
-        $('.familyRow :input').val('');
-        $('.clubRow :input').val('');
-        $('.courseRow :input').val('');
-        clearPhotoFields();
+    $('#memberForm').get(0).reset();
+    setApplicationType();
+    $('.familyRow').remove();
+    $('.clubRow').remove();
+    $('.courseRow').remove();
+    $('#family').val(0);
+    $('.familyRow :input').val('');
+    $('.clubRow :input').val('');
+    $('.courseRow :input').val('');
+    clearPhotoFields();
     recalc();
     updateGrandTotal();
 }
@@ -418,19 +408,20 @@ function renderApplicants() {
 }
 
 function setApplicationType() {
-    let urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('type')) {
-        switch (urlParams.get('type')) {
-            case "renew":
-                $('#renewMember').prop("checked", true);
-                break;
-            case "new":
-                $('#newMember').prop("checked", true);
-                break;
-            default:
-                $('#newMember').prop("checked", true);
-        }
-    } else {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const applicationType = pathParts[pathParts.length - 1];
+
+    switch (applicationType) {
+        case "renew":
+            $('#renewMember').prop("checked", true);
+            break;
+        case "half":
+            $('#halfMember').prop("checked", true);
+            break;
+        case "new":
+            $('#newMember').prop("checked", true);
+            break;
+        default:
         $('#newMember').prop("checked", true);
     }
 }
@@ -639,7 +630,7 @@ $(function(){
     }
 
     $('#addFamily').on('click', addFamilyRow);
-    $('.btnDeleteFam').on('click', function() {
+    $('#familyApp').on('click', '.btnDeleteFam', function() {
         const index = $(this).data('id');
         removeFamily(index);
     });
@@ -698,7 +689,7 @@ $(function(){
             let app = gatherApplicantObject();
             applicants.push(app);
             try { $('#members_json').val(JSON.stringify(applicants)); } catch (e) { console.error('Failed to serialize applicants', e); }
-            $('#form').submit();
+            $('#memberForm').submit();
             return;
         }
 
@@ -716,7 +707,7 @@ $(function(){
         try { $('#members_json').val(JSON.stringify(applicants)); } catch (e) { console.error('Failed to serialize applicants', e); }
     
         // Use native submit to bypass jQuery Validate
-        $('#form')[0].submit();
+        $('#memberForm').submit();
     });
 
     setApplicationType()

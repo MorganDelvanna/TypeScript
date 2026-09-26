@@ -17,7 +17,7 @@ export const renderMemberView = (props: PageProps): string => {
     <!-- Embedded Data Script -->
         <h1>Membership Application</h1>
         <h2><span id="memberYear">October 1st, 2025 - September 30th, 2026</span></h2>
-        <form id="memberForm" action="/stripe/checkout" method="POST" enctype="multipart/form-data">
+        <form id="memberForm" action="/stripe/checkout" method="POST">
           <input id="csrfToken" name="token" type="hidden" value="${props.csrfToken}" />
           <input type="hidden" id="members_json" name="members_json"  value="">
             <input type="hidden" id="photoData" name="photoData" value="">
@@ -297,7 +297,7 @@ export const renderMemberView = (props: PageProps): string => {
                 <div class="col-6 col-md-2"><input id="archeryBtn" type="radio" title="Archery Membership" name="membershipFee" value="archery" class="hidden">&nbsp;$${props.fees.get('general_half')}</div>
             </div>
             <div class="row">
-                <div class="d-none d-sm-block col-md-6">Additional Family Members<</div>
+                <div class="d-none d-sm-block col-md-6">Additional Family Members</div>
                 <div class="col-6 d-md-none">Extra Family</div>
                 <div class="d-none d-sm-block col-md-2">$${props.fees.get('family')}</div>
                 <div class="d-none d-sm-block col-md-2">$${props.fees.get('family')}</div>

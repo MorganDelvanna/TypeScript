@@ -26,6 +26,12 @@ h1
 	text-align:center;
 	width: 100%;
 }
+hr {
+  color: black;
+  height: 2px;
+  background-color: black;
+}
+
 
 .alt
 {

@@ -2,7 +2,6 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import express, { type Request, type Response, type NextFunction } from 'express';
 import session from 'express-session';
-import Stripe from 'stripe';
 import { doubleCsrf } from 'csrf-csrf';
 import cookieParser from 'cookie-parser';
 import { initializeDatabase, query } from './db.js';
@@ -38,13 +37,13 @@ import { renderRiflesView } from './views/rifles.js';
 import { renderJuniorsView } from './views/juniors.js';
 import { renderContactView } from './views/contacts.js';
 import { renderDirectionsView } from './views/directions.js';
-import { renderMemberView } from './views/stripe/memberform.js';
-import { Console } from 'console';
+import { createStripeRouter } from './routes/stripe.js';
 
 
 declare module 'express-session' {
   interface SessionData {
     authenticated?: boolean;
+    csrfInitialized?: boolean;
     user?: {
       Id?: number;
       username?: string;
@@ -79,13 +78,10 @@ type NewsRecord = {
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
 const sessionSecret = process.env.SESSION_SECRET;
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.toString();
 
 if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set in .env');
 }
-const stripe = new Stripe(stripeSecretKey ?? '');
-
 app.use(express.urlencoded({ extended: false }));
 app.use(session({
   secret: sessionSecret,
@@ -97,6 +93,7 @@ app.use(cookieParser(sessionSecret));
 const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   getSecret: () => sessionSecret,
   getSessionIdentifier: (req) => req.sessionID,
+  getCsrfTokenFromRequest: (req) => String(req.body?.token ?? req.headers['x-csrf-token'] ?? ''),
   cookieName: '__csrf',
   cookieOptions: { sameSite: 'lax', secure: process.env.NODE_ENV === 'production' },
 });
@@ -105,6 +102,7 @@ const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
 app.use(doubleCsrfProtection);
 
 app.use(express.static(path.join(__dirname, '../public')));
+app.use('/stripe', createStripeRouter({ generateCsrfToken }));
 
 function page(title: string, content: string): string {
   return `<!doctype html>
@@ -157,32 +155,6 @@ function requireAdmin(req: Request, res: Response, next: NextFunction): void {
     return;
   }
   res.redirect('/admin/login');
-}
-
-async function getFees(): Promise<Map<string, number>> {
-  let fees = new Map<string, number>();
-  
-  const initiationFee = await stripe.prices.retrieve(process.env.PRICE_INITIATION ?? '');
-  const generalFee = await stripe.prices.retrieve(process.env.PRICE_GENERAL ?? '');
-  const seniorFee = await stripe.prices.retrieve(process.env.PRICE_SENIOR ?? ''); 
-  const juniorFee = await stripe.prices.retrieve(process.env.PRICE_JUNIOR ?? '');
-  const extraFee = await stripe.prices.retrieve(process.env.PRICE_EXTRA ?? '');
-  const familyFee = await stripe.prices.retrieve(process.env.PRICE_FAMILY ?? '');
-  const generalHalfFee = await stripe.prices.retrieve(process.env.PRICE_GENERAL_HALF ?? '');
-  const seniorHalfFee = await stripe.prices.retrieve(process.env.PRICE_SENIOR_HALF ?? '');
-  const juniorHalfFee = await stripe.prices.retrieve(process.env.PRICE_JUNIOR_HALF ?? ''); 
-
-  fees.set('initiation', (initiationFee.unit_amount ?? 7500)/ 100 );
-  fees.set('general', (generalFee.unit_amount ?? 35000)/ 100);
-  fees.set('senior', (seniorFee.unit_amount ?? 32000)/ 100);
-  fees.set('junior', (juniorFee.unit_amount ?? 25000)/ 100);
-  fees.set('extra', (extraFee.unit_amount ?? 2500)/ 100);
-  fees.set('family', (familyFee.unit_amount ?? 2000)/ 100);
-  fees.set('general_half', (generalHalfFee.unit_amount ?? 25000)/ 100);
-  fees.set('senior_half', (seniorHalfFee.unit_amount ?? 23000)/ 100);
-  fees.set('junior_half', (juniorHalfFee.unit_amount ?? 28000)/ 100);
-  return fees;
-
 }
 
 async function verifyUserPassword(storedPassword: string, inputPassword: string): Promise<boolean> {
@@ -417,19 +389,6 @@ app.get('/contact', (_req, res) => {
   const html = renderContactView({
     menuMap: loadMenuMap(),
     currentPath: '/contact',
-  });
-  res.send(html);
-});
-
-app.get('/stripe/memberform/:applicationType', async (req, res) => {
-  const applicationType = req.params.applicationType;
-  const token = generateCsrfToken(req, res);
-  const html = renderMemberView({
-    menuMap: loadMenuMap(),
-    currentPath: `/stripe/memberform/${applicationType}`,
-    applicationType,
-    fees: await getFees(),
-    csrfToken: token
   });
   res.send(html);
 });
